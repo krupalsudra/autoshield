@@ -1,75 +1,96 @@
+import streamlit as st
 from datetime import datetime
+import time
 
-# ------------------- Feature 1: Smart Honeypot (Fake Login Trap) ------------------- #
-def smart_honeypot():
-    print("\n=== Honeypot: Fake Secure Server Login ===")
-    username = input("Username: ")
-    password = input("Password: ")
-    with open("login_attempts.txt", "a") as f:
-        f.write(f"[{datetime.now()}] Honeypot Login - Username: {username}, Password: {password}\n")
-    print("Access Denied. Intrusion logged.")
+# -------------------- Helper Functions --------------------
 
-# ------------------- Feature 2: Dark Web Monitor (Simulated Alert) ------------------- #
-def dark_web_monitor():
-    email = "admin@autoshield.com"
-    print(f"\n[ALERT] Dark Web Leak Found for: {email}")
-    print("Leaked on: breachedforums.onion")
-    print("Leaked Data: Password123")
-    with open("alerts.txt", "a") as f:
-        f.write(f"[{datetime.now()}] Dark Web Leak Alert for {email}\n")
+def log_event(filename, content):
+    with open(filename, "a") as f:
+        f.write(f"[{datetime.now()}] {content}\n")
 
-# ------------------- Feature 3: Self-Healing Patch Suggestion ------------------- #
-def self_healing_patch():
-    vulnerability = "Apache Server CVE-2023-12345"
-    print(f"\n[THREAT] Detected: {vulnerability}")
-    print("Status: Outdated Apache server version.")
-    print("Suggested Patch Command:")
-    print("sudo apt update && sudo apt install apache2 --only-upgrade")
-    with open("patch_logs.txt", "a") as f:
-        f.write(f"[{datetime.now()}] Suggested Patch for: {vulnerability}\n")
+# -------------------- Feature 1: Smart Honeypot --------------------
 
-# ------------------- Feature 4: Voice/Text Command Interface ------------------- #
-def voice_command_control():
-    print("\n=== Voice/Text Command Center ===")
-    command = input("Say a command (e.g., show threats, block ip): ").lower()
+def smart_honeypot_ui():
+    st.subheader("🔐 Smart Honeypot")
+    username = st.text_input("Username", key="honeypot_user")
+    password = st.text_input("Password", type="password", key="honeypot_pass")
+    if st.button("Fake Login"):
+        log_event("login_attempts.txt", f"Honeypot login by: {username} / {password}")
+        st.error("Access Denied! Intrusion attempt recorded.")
 
-    if "show" in command and "threat" in command:
-        print("3 Active Threats:\n1. SSH Attack from 192.168.1.5\n2. SQL Injection on Port 443\n3. Email Leak Found")
-    elif "block" in command:
-        print("Blocking IP address 192.168.1.5... ✅ Done.")
-        with open("block_logs.txt", "a") as f:
-            f.write(f"[{datetime.now()}] Blocked IP: 192.168.1.5 due to command\n")
-    else:
-        print("Command not recognized. Try again.")
+# -------------------- Feature 2: Dark Web Monitor --------------------
 
-# ------------------- Main Program Controller ------------------- #
-def main_autoshield():
-    print("=== Welcome to AutoShield – Smart 24/7 SOC System ===")
+def dark_web_monitor_ui():
+    st.subheader("🌐 Dark Web Monitor")
+    email = st.text_input("Email to check for leaks", value="admin@autoshield.com")
+    if st.button("Check Leak"):
+        st.warning("Leaked on: breachedforums.onion")
+        st.code("Leaked Data: admin@autoshield.com : Password123")
+        log_event("alerts.txt", f"Dark Web leak found for: {email}")
 
-    while True:
-        print("\nChoose a feature to run:")
-        print("1. Honeypot (Trap Fake Login)")
-        print("2. Dark Web Leak Monitor")
-        print("3. Self-Healing Patch Suggestion")
-        print("4. Voice/Text Command Center")
-        print("5. Exit")
+# -------------------- Feature 3: Self-Healing Patch --------------------
 
-        choice = input("Enter choice (1-5): ")
+def self_healing_patch_ui():
+    st.subheader("🛠️ Self-Healing System")
+    vuln = st.selectbox("Choose Vulnerability", ["Apache CVE-2023", "Nginx Outdated", "Windows SMB"])
+    if st.button("Run Fix"):
+        time.sleep(1)
+        st.success(f"{vuln} patched successfully.")
+        st.code("sudo apt update && sudo apt upgrade -y")
+        log_event("patch_logs.txt", f"{vuln} patched with update command.")
 
-        if choice == '1':
-            smart_honeypot()
-        elif choice == '2':
-            dark_web_monitor()
-        elif choice == '3':
-            self_healing_patch()
-        elif choice == '4':
-            voice_command_control()
-        elif choice == '5':
-            print("Exiting AutoShield... Goodbye!")
-            break
+# -------------------- Feature 4: Smart Command Center --------------------
+
+def voice_command_ui():
+    st.subheader("🎙️ Command Center")
+    command = st.text_input("Enter Command (e.g., 'show threats', 'block ip')")
+    if st.button("Run Command"):
+        if "show" in command.lower():
+            st.info("3 Fake Threats Detected")
+            st.code("Threat 1: Brute Force | Threat 2: SQL Injection | Threat 3: Port Scan")
+            log_event("threat_logs.txt", "3 fake threats shown via command")
+        elif "block" in command.lower():
+            st.warning("Blocking IP: 192.168.1.100")
+            log_event("block_logs.txt", "Blocked IP 192.168.1.100")
         else:
-            print("Invalid choice. Please try again.")
+            st.write("Command not recognized. Try 'show threats' or 'block ip'.")
 
-# ------------------- Run the System ------------------- #
+# -------------------- View Logs --------------------
+
+def view_logs_ui():
+    st.subheader("📁 View Logs")
+    file = st.selectbox("Choose Log File", ["login_attempts.txt", "alerts.txt", "patch_logs.txt", "block_logs.txt", "threat_logs.txt"])
+    try:
+        with open(file, "r") as f:
+            logs = f.read()
+            st.text_area("Log Content", logs, height=250)
+    except FileNotFoundError:
+        st.warning("No logs found yet!")
+
+# -------------------- Main App --------------------
+
+def main():
+    st.title("🛡️ AutoShield: AI-Powered SOC System")
+    st.markdown("**A 24/7 Smart SOC Simulation with Honeypot, Dark Web Monitoring, Voice Commands & Auto-Patch**")
+
+    menu = st.sidebar.radio("Choose Feature", [
+        "Smart Honeypot",
+        "Dark Web Monitor",
+        "Self-Healing System",
+        "Command Center",
+        "View Logs"
+    ])
+
+    if menu == "Smart Honeypot":
+        smart_honeypot_ui()
+    elif menu == "Dark Web Monitor":
+        dark_web_monitor_ui()
+    elif menu == "Self-Healing System":
+        self_healing_patch_ui()
+    elif menu == "Command Center":
+        voice_command_ui()
+    elif menu == "View Logs":
+        view_logs_ui()
+
 if __name__ == "__main__":
-    main_autoshield()
+    main()
